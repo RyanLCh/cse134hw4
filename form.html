@@ -368,6 +368,19 @@
             }
         });
 
+        function flashError (message) {
+            comment.value = commentInput;
+            comment.style.animation = 'fadeWhite 2s forwards';
+            comment.addEventListener("animationend", function () {
+                comment.style.animation = 'none';
+            })
+
+            commentError.textContent = message;
+            setTimeout(function() {
+                commentError.textContent = '';
+            }, 5000);
+        }
+
         comment.addEventListener('input', (event) => {
             if (`${event.data}` == 'null') {
                 commentInput = comment.value;
@@ -379,17 +392,16 @@
                     message: 'Invalid Input: ' + `${event.data}`
                 });
 
-                comment.value = commentInput;
-                comment.style.animation = 'fadeWhite 2s forwards';
-                comment.addEventListener("animationend", function () {
-                    comment.style.animation = 'none';
-                })
+                flashError("Entered value needs to be alphanumeric or {!@#$%^&*_?.,'}.");
+            }
+            else if (commentInput.length >= maxLength) {
+                formErrors.push({
+                    field: 'Comment',
+                    message: 'Char {' + `${event.data}` + '} over maximum limit'
+                });
 
-                commentError.textContent = "Entered value needs to be alphanumeric or {!@#$%^&*_?.,'}.";
-                setTimeout(function() {
-                    commentError.textContent = '';
-                }, 5000);
-            } 
+                flashError('No characters remaining');
+            }
             else if (comment.checkValidity()) {
                 commentError.textContent = "";
                 commentInput = comment.value;
@@ -401,7 +413,9 @@
             }
 
             commentInfo.textContent = (maxLength - commentInput.length) + " characters remaining";
-        })
+            let ratio = 0.75 + (.25 * commentInput.length/maxLength) + 'em';
+            commentInfo.style.fontSize = ratio;
+        });
 
         form.addEventListener("submit", (event) => {
             if (name.validity.valueMissing) {
