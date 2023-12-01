@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>title</title>
+
+    <style>
+        :root {
+            --bg-color: #FFFFFF;
+            --txt-color: #000000;
+            --button-color: #888C95;
+            --err-color: #FF6961;
+            --font-set: "Times New Roman"
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--txt-color);
+            transition: 0.3s;
+            font-family: var(--font-set);
+        }
+
+        input[type=text], input[type=email], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-top: 6px;
+            margin-bottom: 0px;
+            resize: vertical;
+            background-color: var(--bg-color);
+            color: var(--txt-color);
+            font-family: var(--font-set);
+            transition: 0.3s;
+        }
+        
+        #user_message {
+            height: 200px;
+        }
+
+        input[type=submit] {
+            width: 100%;
+            background-color: var(--button-color);
+            color: var(--txt-color);
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        input[type=submit]:hover {
+            filter: brightness(85%);
+        }
+
+        input:invalid, textarea:invalid {
+            border-color: var(--err-color);
+            border-style: solid;
+            border-width: 3px;
+            transition: 0.3s;
+        }   
+
+        label {
+            margin-top:15px;
+            display:inline-block;
+        }
+
+        output {
+            display: inline;
+            width  : 50%;
+            padding: 0;
+            margin-top: 0;
+        }
+
+        .error {
+            font-size: 80%;
+            color: var(--err-color);
+            border-radius: 0 0 5px 5px;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        @keyframes fadeWhite {
+            from {
+                background-color: var(--err-color);
+            }
+            to {
+                background-color: var(--bg-color);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+            }
+        }
+
+        output.info {
+            float: right;
+            text-align: right;
+            font-size: smaller;
+        }
+
+        #color-label {
+            width: 125px;
+            height: 50px;
+            position: relative;
+            display: block;
+            background: #ebebeb;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            float: right;
+        }
+
+        label#color-label:after {
+            content: "";
+            width: 45px;
+            height: 45px;
+            position: absolute;
+            top: 2.5px;
+            left: 2.5px;
+            background: linear-gradient(180deg, #ffcc89, #d8860b);
+            border-radius: 45px;
+            transition: 0.3s;
+        }
+
+        input#color-scheme {
+            width: 0;
+            height: 0;
+            visibility: hidden;
+        }
+
+        #color-scheme:checked + label {
+            background: #242424;
+        }
+
+        #color-scheme:checked + label:after {
+            left: 122.5px;
+            transform: translateX(-100%);
+            background: linear-gradient(180deg, #777, #3a3a3a);
+        }
+
+        #enable-custom {
+            margin: 2.5% 50px 1% 0;
+        }
+
+    </style>
+</head>
+<body>
+    <input type="checkbox" id="color-scheme"/>
+    <label for="color-scheme" id="color-label"></label>
+
+    <label for="enable-custom">Select Theme:</label>
+    <select id="pickTheme" onchange="changeTheme (this);">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="sakura">Sakura</option>
+        <option value="forest">Forest</option>
+        <option value="sky">Sky</option>
+        <option value="pumpkin">Pumpkin</option>
+    </select>
+    <label for="bgcolorpicker">BG: </label>
+    <input type="color" value="#000000">
+    <label for="bgcolorpicker">TXT: </label>
+    <input type="color" value="#000000">
+    <label for="fontSet">Font Set: </label>
+    <select id="fontSet" onchange="changeFont (this);">
+        <option value="Times New Roman" selected="selected">Times New Roman</option>
+        <option value="Helvetica">Helvetica</option>
+        <option value="Comic Sans MS">Comic Sans</option>
+        <option value="monospace">Monospace</option>
+    </select>
+
+    <h2>Contact Form</h2>
+    <form action="https://httpbin.org/post" method="post" id="contact">
+
+        <fieldset>
+            <legend>Send a Message!</legend>
+            <label for="user_name">Your Name (Required)</label>
+            <input type="text" pattern="[a-zA-Z0-9 ']{1,50}" id="user_name" name="user_name" required>
+            <output class="error"></output> <output class="info"></output>
+            <br>
+            <label for="user_email">Your Email (Required)</label>
+            <input type="email" id="user_email" name="user_email" minlength="10" maxlength="75" required>
+            <output class="error"></output> <output class="info"></output>
+            <br>
+            <label for="user_message">Your Message (Required)</label>
+            <textarea id="user_message" name="user_message" required></textarea>
+            <output class="error"></output> <output class="comment info"></output>
+            <br>
+            <input type="hidden" name="possible_bot" value="true">
+        </fieldset>
+
+        <fieldset>
+            <input type="submit" value="Send">
+        </fieldset>
+
+    </form>
+
+    <script>
+
+        const form = document.querySelector("form");
+        const name = document.getElementById("user_name");
+        const nameError = document.querySelector("#user_name + output.error");
+        const email = document.getElementById("user_email");
+        const emailError = document.querySelector("#user_email + output.error");
+        const comment = document.getElementById("user_message");
+        const commentError = document.querySelector("#user_message + output.error");
+        const commentInfo = document.querySelector("output.comment.info");
+        const colorScheme = document.getElementById('color-scheme');
+        const pickTheme = document.getElementById('pickTheme');
+        const bgColor = document.querySelectorAll("input[type=color]")[0];
+        const txtColor = document.querySelectorAll("input[type=color]")[1];
+        const fontSet = document.getElementById("fontSet");
+
+        const regEx1 = new RegExp('/@/');
+        const regEx2 = new RegExp('/./');
+        const commentRegEx = new RegExp("[a-zA-Z0-9!@#$%^&*_?.,']");
+
+        form.noValidate = true;
+        let nameInput = '';
+        let emailInput = '';
+        let commentInput = '';
+        let formErrors = [];
+        let maxLength = 500;
+
+        function theme(bg,txt,font){
+            this.bg = bg;
+            this.txt = txt;
+            this.font = font;
+        }
+
+        let light = new theme('#ffffff', '#000000', 'Times New Roman');
+        let dark = new theme('#000000', '#ffffff', 'Helvetica');
+        let sakura = new theme('#ebb2d9', '#ffffff', 'monospace');
+        let forest = new theme('#00bf7d','#000000','Comic Sans MS');
+        let sky = new theme('#0073e6', '#ffffff', 'monospace');
+        let pumpkin = new theme('#faaf90', '#000000', 'Comic Sans MS');
+
+        let themes = {
+            'light': light,
+            'dark': dark,
+            'sakura': sakura,
+            'forest': forest,
+            'sky': sky,
+            'pumpkin': pumpkin
+        }
+
+        bgColor.value = getComputedStyle(document.documentElement).getPropertyValue('--bg-color');
+        txtColor.value = getComputedStyle(document.documentElement).getPropertyValue('--txt-color');
+
+        console.log(bgColor);
+        console.log(getComputedStyle(document.documentElement).getPropertyValue('--bg-color'));
+
+        commentInfo.textContent = maxLength + " characters remaining";
+
+
+        colorScheme.addEventListener('change', changeColor)
+
+        function changeTheme (themeStyle) {
+            console.log(themes[themeStyle.value].bg);
+            
+            document.documentElement.style.setProperty('--bg-color', themes[themeStyle.value].bg);
+            document.documentElement.style.setProperty('--txt-color', themes[themeStyle.value].txt);
+            document.documentElement.style.setProperty('--font-set', themes[themeStyle.value].font);
+
+            bgColor.value = themes[themeStyle.value].bg;
+            txtColor.value = themes[themeStyle.value].txt;
+            fontSet.value = themes[themeStyle.value].font;
+        }
+
+        function changeColor() {
+            if (colorScheme.checked) {
+                document.documentElement.style.setProperty('--bg-color', dark.bg);
+                document.documentElement.style.setProperty('--txt-color', dark.txt);
+                document.documentElement.style.setProperty('--font-set', dark.font);
+            }
+            else {
+                document.documentElement.style.setProperty('--bg-color', light.bg);
+                document.documentElement.style.setProperty('--txt-color', light.txt);
+                document.documentElement.style.setProperty('--font-set', light.font);
+            }
+        }
+
+        bgColor.addEventListener('input', (event) => {
+            document.documentElement.style.setProperty('--bg-color', bgColor.value);
+            themes[pickTheme.value].bg = bgColor.value;
+        });
+        txtColor.addEventListener('input', (event) => {
+            document.documentElement.style.setProperty('--txt-color', txtColor.value);
+            themes[pickTheme.value].txt = txtColor.value;
+        });
+
+        function changeFont (fontstyle) {
+            document.documentElement.style.setProperty('--font-set', fontstyle.value);
+            themes[pickTheme.value].font = fontstyle.value;
+        }
+
+        name.addEventListener("input", (event) => {
+            if (name.validity.patternMismatch)
+            {
+                name.value = nameInput;
+
+                name.style.animation = 'fadeWhite 2s forwards';
+                name.addEventListener("animationend", function () {
+                    name.style.animation = 'none';
+                })
+
+                nameError.textContent = "Entered value needs to be alphanumeric.";
+                setTimeout(function() {
+                    commentError.textContent = '';
+                }, 5000);
+            } 
+            else if (name.checkValidity()) {
+                nameInput = name.value;
+                nameError.textContent = "";
+            }
+            else 
+            {
+                showNameError();
+            }
+        });
+        
+        email.addEventListener("input", (event) => {
+            if (email.validity.patternMismatch)
+            {
+                email.value = emailInput;
+            } 
+            else 
+            {
+                emailInput = email.value;
+            }
+
+            if (email.checkValidity()) {
+                emailError.textContent = "";
+            } else {
+                showEmailError();
+            }
+        });
+
+        comment.addEventListener('input', (event) => {
+            if (`${event.data}` == 'null') {
+                commentInput = comment.value;
+            }
+            else if (!commentRegEx.test(`${event.data}`))
+            {
+                formErrors.push({
+                    field: 'Comment',
+                    message: 'Invalid Input: ' + `${event.data}`
+                });
+
+                comment.value = commentInput;
+                comment.style.animation = 'fadeWhite 2s forwards';
+                comment.addEventListener("animationend", function () {
+                    comment.style.animation = 'none';
+                })
+
+                commentError.textContent = "Entered value needs to be alphanumeric or {!@#$%^&*_?.,'}.";
+                setTimeout(function() {
+                    commentError.textContent = '';
+                }, 5000);
+            } 
+            else if (comment.checkValidity()) {
+                commentError.textContent = "";
+                commentInput = comment.value;
+            }
+            else 
+            {
+                comment.ariaInvalid = true;
+                showCommentError();
+            }
+
+            commentInfo.textContent = (maxLength - commentInput.length) + " characters remaining";
+        })
+
+        form.addEventListener("submit", (event) => {
+            if (name.validity.valueMissing) {
+                formErrors.push({
+                    field: 'Name',
+                    message: 'Missing Value'
+                });
+            } 
+
+            if (!email.checkValidity()) {
+                if (email.validity.valueMissing) {
+                    formErrors.push({
+                        field: 'Email',
+                        message: 'Missing Value'
+                    });
+                }
+                if (!regEx1.test(email.value)) {
+                    formErrors.push({
+                        field: 'Email',
+                        message: 'Missing Value {@}'
+                    });
+                }
+                if (!regEx2.test(email.value)) {
+                    formErrors.push({
+                        field: 'Email',
+                        message: 'Missing Value {.}'
+                    });
+                }
+            } 
+
+            if (!comment.checkValidity()) {
+                if (comment.validity.tooLong) {
+                    formErrors.push({
+                        field: 'Comment',
+                        message: 'Comment length too long {' + comment.value.length + '/' + comment.maxLength + 'characters}'
+                    });
+                }
+            }
+
+            if (!name.checkValidity() || !email.checkValidity() || !comment.checkValidity()) {
+                if (!name.checkValidity()) showNameError();
+                if (!email.checkValidity()) showEmailError();
+                if (!comment.checkValidity()) showCommentError();
+                event.preventDefault();
+
+                var formErrorsInput = document.createElement('input');
+                formErrorsInput.type = 'hidden';
+                formErrorsInput.name = 'form-errors';
+                formErrorsInput.value = JSON.stringify(formErrors);
+                form.appendChild(formErrorsInput);
+            }
+        });
+
+        function showNameError() {
+            if (name.validity.valueMissing) {
+                nameError.textContent = "You need to enter a name.";
+            } else if (name.validity.patternMismatch) {
+                name.setCustomValidity("Entered value needs to be alphanumeric");
+                nameError.textContent = "Entered value needs to be alphanumeric.";
+            } 
+        }
+
+        function showEmailError() {
+            if (email.validity.valueMissing) {
+                emailError.textContent = "You need to enter an email address.";
+            } else if (email.validity.typeMismatch) {
+                emailError.textContent = "Entered value needs to be an email address.";
+            } 
+        }
+
+        function showCommentError() {
+            if (comment.validity.valueMissing) {
+                commentError.textContent = "You need to enter a message.";
+            } else if (comment.validity.typeMismatch) {
+                commentError.textContent = "Entered value needs to be alphanumeric or {!@#$%^&*_?.,'}.";
+            } else if (comment.validity.tooLong) {
+                emailError.textContent = `Email should be at most ${email.maxLength} characters; you entered ${email.value.length}.`;
+            }
+        }
+    </script>
+    
+</body>
+</html>
