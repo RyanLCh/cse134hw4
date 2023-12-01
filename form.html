@@ -142,7 +142,7 @@
             background: linear-gradient(180deg, #777, #3a3a3a);
         }
 
-        #enable-custom {
+        #pickTheme {
             margin: 2.5% 50px 1% 0;
         }
 
@@ -152,26 +152,37 @@
     <input type="checkbox" id="color-scheme"/>
     <label for="color-scheme" id="color-label"></label>
 
-    <label for="enable-custom">Select Theme:</label>
-    <select id="pickTheme" onchange="changeTheme (this);">
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-        <option value="sakura">Sakura</option>
-        <option value="forest">Forest</option>
-        <option value="sky">Sky</option>
-        <option value="pumpkin">Pumpkin</option>
-    </select>
-    <label for="bgcolorpicker">BG: </label>
-    <input type="color" value="#000000">
-    <label for="bgcolorpicker">TXT: </label>
-    <input type="color" value="#000000">
-    <label for="fontSet">Font Set: </label>
-    <select id="fontSet" onchange="changeFont (this);">
-        <option value="Times New Roman" selected="selected">Times New Roman</option>
-        <option value="Helvetica">Helvetica</option>
-        <option value="Comic Sans MS">Comic Sans</option>
-        <option value="monospace">Monospace</option>
-    </select>
+    <div id='setColors'>
+        <label for="pickTheme">Select Theme:</label>
+        <select id="pickTheme" onchange="changeTheme (this);">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="sakura">Sakura</option>
+            <option value="forest">Forest</option>
+            <option value="sky">Sky</option>
+            <option value="pumpkin">Pumpkin</option>
+        </select>
+        <label for="bgcolorpicker">BG: </label>
+        <input type="color" value="#000000">
+        <label for="bgcolorpicker">TXT: </label>
+        <input type="color" value="#000000">
+        <label for="fontSet">Font Set: </label>
+        <select id="fontSet" onchange="changeFont (this);">
+            <option value="Times New Roman" selected="selected">Times New Roman</option>
+            <option value="Helvetica">Helvetica</option>
+            <option value="Comic Sans MS">Comic Sans</option>
+            <option value="monospace">Monospace</option>
+        </select>
+    </div>
+
+    <noscript>
+        <style type="text/css">
+            div#setColors {display:none;}
+        </style>
+        <div class="noscriptmsg">
+            You do not have javascript enabled to access extra features.
+        </div>
+    </noscript>
 
     <h2>Contact Form</h2>
     <form action="https://httpbin.org/post" method="post" id="contact">
@@ -256,19 +267,36 @@
 
         commentInfo.textContent = maxLength + " characters remaining";
 
+        colorScheme.addEventListener('change', changeColor);
 
-        colorScheme.addEventListener('change', changeColor)
+        document.addEventListener('DOMContentLoaded', (event) => {
+            let th = (localStorage.getItem('Preferred Theme'));
+            if(th != null) {
+                changeTheme(th);
+            }
+        })
 
         function changeTheme (themeStyle) {
-            console.log(themes[themeStyle.value].bg);
-            
-            document.documentElement.style.setProperty('--bg-color', themes[themeStyle.value].bg);
-            document.documentElement.style.setProperty('--txt-color', themes[themeStyle.value].txt);
-            document.documentElement.style.setProperty('--font-set', themes[themeStyle.value].font);
+            if(typeof(themeStyle) == 'string') {
+                document.documentElement.style.setProperty('--bg-color', themes[themeStyle].bg);
+                document.documentElement.style.setProperty('--txt-color', themes[themeStyle].txt);
+                document.documentElement.style.setProperty('--font-set', themes[themeStyle].font);
 
-            bgColor.value = themes[themeStyle.value].bg;
-            txtColor.value = themes[themeStyle.value].txt;
-            fontSet.value = themes[themeStyle.value].font;
+                bgColor.value = themes[themeStyle].bg;
+                txtColor.value = themes[themeStyle].txt;
+                fontSet.value = themes[themeStyle].font;
+                localStorage.setItem('Preferred Theme', themeStyle.value);
+            } 
+            else {
+                document.documentElement.style.setProperty('--bg-color', themes[themeStyle.value].bg);
+                document.documentElement.style.setProperty('--txt-color', themes[themeStyle.value].txt);
+                document.documentElement.style.setProperty('--font-set', themes[themeStyle.value].font);
+    
+                bgColor.value = themes[themeStyle.value].bg;
+                txtColor.value = themes[themeStyle.value].txt;
+                fontSet.value = themes[themeStyle.value].font;
+                localStorage.setItem('Preferred Theme', themeStyle.value);
+            }
         }
 
         function changeColor() {
